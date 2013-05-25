@@ -8,7 +8,7 @@ Features:
 - Support `GD` and `Imagick`
 - Automaticly thumbnails caching
 - Cache sorting to subdirectories
-- Support Retina displays
+- Support `Retina` displays
 - Based on Kohana Image Library.
 
 ##Installing and configuring
@@ -23,9 +23,9 @@ Add the following to your config file `components` section:
     'class' => 'application.extensions.easyimage.EasyImage',
     //'driver' => 'GD',
     //'quality' => 100,
-    //'cachePath' => '/assets/',
+    //'cachePath' => '/assets/easyimage/',
     //'cacheTime' => 2592000,
-    //'retinaSupport' => true,
+    //'retinaSupport' => false,
   ),
 ```
 and the following to `import` section:
