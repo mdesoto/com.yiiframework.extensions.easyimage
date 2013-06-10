@@ -232,7 +232,7 @@ class EasyImage extends CApplicationComponent
 
 	public function thumbOf($file, $params = array(), $htmlOptions = array())
 	{
-		return CHtml::image($this->thumbSrcOf($file, $params), null, $htmlOptions);
+		return CHtml::image($this->thumbSrcOf($file, $params), isset($htmlOptions['alt']) ? $htmlOptions['alt'] : '', $htmlOptions);
 	}
 
 	//IDE AutoComplete methods (because factory pattern)
