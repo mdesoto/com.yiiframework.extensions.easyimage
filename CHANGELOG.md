@@ -1,3 +1,6 @@
+#1.0.1
+- Fixed actual bugs
+
 #1.0.0
 - Support Retina displays
 - Removed fixed path to the cache
