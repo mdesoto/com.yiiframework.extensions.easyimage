@@ -77,7 +77,7 @@ class EasyImage extends CApplicationComponent
 
 	public function detectPath($file)
 	{
-		$fullPath = dirname(Yii::app()->basePath) . $file;
+        $fullPath = Yii::getPathOfAlias('www') . $file;
 		if (is_file($fullPath)) {
 			return $fullPath;
 		}
@@ -192,7 +192,7 @@ class EasyImage extends CApplicationComponent
 	{
 		// Paths
 		$hash = md5($file . serialize($params));
-		$cachePath = dirname(Yii::app()->basePath) . $this->cachePath . $hash{0};
+		$cachePath = Yii::getPathOfAlias('www') . $this->cachePath . $hash{0};
 		$cacheFileExt = isset($params['type']) ? $params['type'] : pathinfo($file, PATHINFO_EXTENSION);
 		$cacheFileName = $hash . '.' . $cacheFileExt;
 		$cacheFile = $cachePath . DIRECTORY_SEPARATOR . $cacheFileName;
