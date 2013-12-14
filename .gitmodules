@@ -1,6 +1,3 @@
-[submodule "vendor/retina"]
-	path = vendor/retina
-	url = https://github.com/imulus/retinajs.git
 [submodule "vendor/kohana/image"]
 	path = vendor/kohana/image
 	url = https://github.com/kohana/image.git
