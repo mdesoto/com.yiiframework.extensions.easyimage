@@ -1,4 +1,4 @@
-[submodule "vendor/retina.js"]
+[submodule "vendor/retina"]
 	path = vendor/retina.js
 	url = https://github.com/imulus/retinajs.git
 [submodule "vendor/kohana/image"]
