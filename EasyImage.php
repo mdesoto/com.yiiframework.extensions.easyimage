@@ -1,47 +1,27 @@
 <?php
 /**
- * EasyImage class file.
+ * @package com.yiiframework.extensions.easyimage
  * @author Artur Zhdanov <zhdanovartur@gmail.com>
- * @copyright Copyright &copy; Artur Zhdanov 2013-
+ * @author Michael De Soto <michael@de-soto.net>
+ * @copyright 2013 Artur Zhdanov
+ * @copyright 2013-2014 Michael De Soto
  * @license http://www.opensource.org/licenses/bsd-license.php New BSD License
- * @version 1.0.2
+ * @version 1.1.0
  */
 
-Yii::setPathOfAlias('easyimage', dirname(__FILE__));
-Yii::import('easyimage.drivers.*');
+Yii::setPathOfAlias('easyimage', __DIR__);
+Yii::import('easyimage.vendor.kohana.image.classes.*');
+Yii::import('easyimage.vendor.kohana.backport.*');
 
 class EasyImage extends CApplicationComponent
 {
-
-    /**
-     * Resizing directions
-     */
-    const RESIZE_NONE = 0x01;
-    const RESIZE_WIDTH = 0x02;
-    const RESIZE_HEIGHT = 0x03;
-    const RESIZE_AUTO = 0x04;
-    const RESIZE_INVERSE = 0x05;
-    const RESIZE_PRECISE = 0x06;
-
-    /**
-     * Flipping directions
-     */
-    const FLIP_HORIZONTAL = 0x11;
-    const FLIP_VERTICAL = 0x12;
-
-    /**
-     * @var object Image
-     */
+    /** @var object Image */
     private $_image;
 
-    /**
-     * @var string driver type: GD, Imagick
-     */
+    /** @var string driver type: GD, Imagick */
     public $driver = 'GD';
 
-    /**
-     * @var string relative path where the cache files are kept
-     */
+    /** @var string relative path where the cache files are kept */
     public $cachePath = '/assets/easyimage/';
 
     /**
@@ -60,6 +40,8 @@ class EasyImage extends CApplicationComponent
      */
     public $retinaSupport = false;
 
+    public $retinaSupportPath;
+
     /**
      * Constructor.
      * @param string $file
@@ -67,7 +49,8 @@ class EasyImage extends CApplicationComponent
      */
     public function __construct($file = null, $driver = null)
     {
-        if ($file) {
+        if ($file)
+        {
             return $this->_image = Image::factory($this->detectPath($file), $driver ? $driver : $this->driver);
         }
     }
@@ -79,36 +62,52 @@ class EasyImage extends CApplicationComponent
      */
     public function __toString()
     {
-        try {
+        try
+        {
             return $this->image()->render();
-        } catch (CException $e) {
+        }
+        catch (CException $exception)
+        {
             return '';
         }
     }
 
+    /**
+     * Initialize EasyImage extension. The only thing we do here is to include the Retina JavaScript library
+     * (http://retina.js) if desired.
+     *
+     * @return void
+     */
     public function init()
     {
-        // Publish "retina.js" library (http://retinajs.com/)
-        if ($this->retinaSupport) {
+        if ($this->retinaSupport)
+        {
+            if (empty($this->retinaSupportPath))
+            {
+                $this->retinaSupportPath = Yii::getPathOfAlias('easyimage.vendor.retina.src') . '/retina.js';
+            }
+
             Yii::app()->clientScript->registerScriptFile(
-                Yii::app()->assetManager->publish(
-                    Yii::getPathOfAlias('easyimage.assets') . '/retina.js'
-                ),
+                Yii::app()->assetManager->publish($this->retinaSupportPath),
                 CClientScript::POS_HEAD
             );
         }
     }
 
     /**
-     * This method returns the current Image instance.
+     * Returns the current Image instance.
+     *
      * @return Image
      * @throws CException
      */
     public function image()
     {
-        if ($this->_image instanceof Image) {
+        if ($this->_image instanceof Image)
+        {
             return $this->_image;
-        } else {
+        }
+        else
+        {
             throw new CException('Don\'t have image');
         }
     }
