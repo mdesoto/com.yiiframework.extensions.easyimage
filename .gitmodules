@@ -1,0 +1,3 @@
+[submodule "vendor/retina.js"]
+	path = vendor/retina.js
+	url = https://github.com/imulus/retinajs.git
