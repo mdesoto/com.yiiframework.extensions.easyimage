@@ -138,98 +138,15 @@ class EEasyImage extends CApplicationComponent
     }
 
     /**
-     * Return the URL of a given image. Create the cached image if it doesn't already exist.
-     *
-     * @param string $image
-     * @param array $options
-     * @return string
-     */
-    public function generateThumbnailUrl($image, $options = array())
-    {
-        $metadata = new EEasyImageFile($image, $this->relativeCachePath, $options);
-
-        // Return the URL when we've previously generated an image and that image hasn't expired.
-        if (file_exists($metadata->getAbsoluteFilePath()) && (time() - filemtime($metadata->getAbsoluteFilePath()) < $this->timeout))
-        {
-            return $metadata->getAbsoluteUrl();
-        }
-
-        // Create the cache directory when it doesn't exist.
-        if (!is_dir($metadata->getAbsolutePath()))
-        {
-            mkdir($metadata->getAbsolutePath(), $this->fileMode, true);
-        }
-
-        // TODO: Not sure we want to deviate from upstream. We save this to the instance variable where they do not.
-        $this->instance = Image::factory($this->getFilePath($image), $this->driver);
-
-
-        $this->getThumbnail($metadata);
-
-
-        // TODO: Address retina support.
-//        // Same for high-resolution image
-//        if ($this->retinaSupport && $result) {
-//            if ($this->image()->width * 2 <= $originWidth && $this->image()->height * 2 <= $originHeight) {
-//                $retinaFile = $cachePath . DIRECTORY_SEPARATOR . $hash . '@2x.' . $cacheFileExt;
-//                if (isset($params['resize']['width']) && isset($params['resize']['height'])) {
-//                    $params['resize']['width'] = $this->image()->width * 2;
-//                    $params['resize']['height'] = $this->image()->height * 2;
-//                }
-//                $this->_doThumbOf($file, $retinaFile, $params);
-//            }
-//        }
-
-        return $metadata->getAbsoluteUrl();
-    }
-
-    /**
-     * Return Yii generated image tag. Create the cached image if it doesn't already exist.
-     *
-     * @param string $image
-     * @param array $options
-     * @param array $htmlOptions
-     * @return string
-     */
-    public function generateThumbnailTag($image, $options = array(), $htmlOptions = array())
-    {
-        return CHtml::image(
-            $this->generateThumbnailUrl($image, $options),
-            isset($htmlOptions['alt']) ? $htmlOptions['alt'] : '',
-            $htmlOptions
-        );
-    }
-
-    /**
-     * Return the path to the image. Start by prepending the web root to the image path. If we find a file there, let's
-     * use it. Otherwise we must assume that the calling class knows where the file is.
-     *
-     * TODO: It might make sense to do some file checks here regardless of whether the image is in the web root or not.
-     *
-     * @param array $image
-     * @return string
-     */
-    protected function getFilePath($image)
-    {
-        $path = Yii::getPathOfAlias('webroot') . '/' . $image;
-        if (is_file($path))
-        {
-            return $path;
-        }
-
-        return $image;
-    }
-
-    /**
-     * @param EEasyImageFile $metadata
+     * @param EEasyImageFile $image
      * @return bool
      * @throws CException
      */
-    protected function getThumbnail($metadata)
+    protected function generateThumbnail($image)
     {
-        $this->instance = Image::factory($this->getFilePath($metadata->getImage()), $this->driver);
+        $this->instance = Image::factory($this->getFilePath($image->getOriginalRelativePath()), $this->driver);
 
-        foreach ($metadata as $key => $value)
+        foreach ($image->getMetadata() as $key => $value)
         {
             switch($key)
             {
@@ -387,7 +304,86 @@ class EEasyImage extends CApplicationComponent
             }
         }
 
-        return $this->getInstance()->save($metadata->getAbsoluteFilePath(), $this->quality);
+        return $this->getInstance()->save($image->getAbsoluteFilePath(), $this->quality);
+    }
+
+    /**
+     * Return Yii generated image tag. Create the cached image if it doesn't already exist.
+     *
+     * @param string $image
+     * @param array $options
+     * @param array $htmlOptions
+     * @return string
+     */
+    public function generateThumbnailTag($image, $options = array(), $htmlOptions = array())
+    {
+        return CHtml::image(
+            $this->generateThumbnailUrl($image, $options),
+            isset($htmlOptions['alt']) ? $htmlOptions['alt'] : '',
+            $htmlOptions
+        );
+    }
+
+    /**
+     * Return the URL of a given image. Create the cached image if it doesn't already exist.
+     *
+     * @param string $image
+     * @param array $options
+     * @return string
+     */
+    public function generateThumbnailUrl($image, $options = array())
+    {
+        $metadata = new EEasyImageFile($image, $this->relativeCachePath, $options);
+
+        // Return the URL when we've previously generated an image and that image hasn't expired.
+        if (file_exists($metadata->getAbsoluteFilePath()) && (time() - filemtime($metadata->getAbsoluteFilePath()) < $this->timeout))
+        {
+            return $metadata->getAbsoluteUrl();
+        }
+
+        // Create the cache directory when it doesn't exist.
+        if (!is_dir($metadata->getAbsolutePath()))
+        {
+            mkdir($metadata->getAbsolutePath(), $this->fileMode, true);
+        }
+
+        $this->generateThumbnail($metadata);
+
+
+        // TODO: Address retina support.
+//        // Same for high-resolution image
+//        if ($this->retinaSupport && $result) {
+//            if ($this->image()->width * 2 <= $originWidth && $this->image()->height * 2 <= $originHeight) {
+//                $retinaFile = $cachePath . DIRECTORY_SEPARATOR . $hash . '@2x.' . $cacheFileExt;
+//                if (isset($params['resize']['width']) && isset($params['resize']['height'])) {
+//                    $params['resize']['width'] = $this->image()->width * 2;
+//                    $params['resize']['height'] = $this->image()->height * 2;
+//                }
+//                $this->_doThumbOf($file, $retinaFile, $params);
+//            }
+//        }
+
+        return $metadata->getAbsoluteUrl();
+    }
+
+    /**
+     * Return the path to the image. Start by prepending the web root to the image path. If we find a file there, let's
+     * use it. Otherwise we must assume that the calling class knows where the file is.
+     *
+     * TODO: It might make sense to do some file checks here regardless of whether the image is in the web root or not.
+     *
+     * @param array $image
+     * @return string
+     */
+    protected function getFilePath($image)
+    {
+        $path = Yii::getPathOfAlias('webroot') . '/' . $image;
+        if (is_file($path))
+        {
+            return $path;
+        }
+
+        return $image;
     }
 
     /**
@@ -442,7 +438,7 @@ class EEasyImage extends CApplicationComponent
     /**
      * Render the image and return the binary string.
      *
-     * @param null $type The image type to be rendered.
+     * @param string $type The image type to be rendered.
      * @param int $quality Image quality. Used by JPG images only.
      * @return string
      */
@@ -453,7 +449,7 @@ class EEasyImage extends CApplicationComponent
 
     public function resize($width = NULL, $height = NULL, $master = NULL)
     {
-        return $this->resize()->resize($width, $height, $master);
+        return $this->getInstance()->resize($width, $height, $master);
     }
 
     public function rotate($degrees)

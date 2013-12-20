@@ -53,7 +53,7 @@ class EEasyImageFile
 
         if (!file_exists($this->getOriginalAbsolutePath()))
         {
-            throw new CException('');
+            throw new CException('Image does not exist at \'' . $this->getOriginalAbsolutePath() . '\'');
         }
     }
 
@@ -141,7 +141,7 @@ class EEasyImageFile
             return $this->originalAbsolutePath;
         }
 
-        return $this->originalAbsolutePath = rtrim(Yii::getPathOfAlias('webroot')) . '/' . $this->getOriginalRelativePath();
+        return $this->originalAbsolutePath = Yii::getPathOfAlias('webroot') . $this->getOriginalRelativePath();
     }
 
     public function getOriginalRelativePath()
