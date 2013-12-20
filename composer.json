@@ -1,14 +1,25 @@
 {
-    "name": "zhdanovartur/yii-easyimage",
-    "description": "Yii Framework extension for easy creating and caching thumbnails on real time.",
-    "keywords": ["yii", "extension", "image", "thumbnail", "cache", "realtime"],
-    "homepage": "https://github.com/zhdanovartur/yii-easyimage",
+    "name": "com.yiiframework.extensions.easyimage",
+    "description": "EasyImage is a Yii Framework extension to generate and cache thumbnails at application runtime.",
+    "keywords": [
+        "yii",
+        "extension",
+        "image",
+        "thumbnail",
+        "cache",
+        "realtime"
+    ],
+    "homepage": "https://github.com/mdesoto/com.yiiframework.extensions.easyimage",
     "type": "yii-extension",
-    "license": "New BSD",
+    "license": "Revised BSD License",
     "authors": [
         {
             "name": "Artur Zhdanov",
             "email": "zhdanovartur@gmail.com"
+        },
+        {
+            "name": "Michael De Soto",
+            "email": "michael@de-soto.net"
         }
     ],
     "minimum-stability": "dev",
