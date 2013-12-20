@@ -15,11 +15,13 @@ Yii::import('easyimage.vendor.kohana.backport.*');
 
 class EEasyImage extends CApplicationComponent
 {
-    /** @var EEasyImageFile Various metadata about the image */
-//    protected $metadata;
-
     /** @var Image Instance of Image. */
     protected $instance;
+
+    /**
+     * @deprecated
+     * @var string Path relative to the web root. Use relativeCachePath instead. */
+    protected $cachePath;
 
     /** @var string Driver type: GD, Imagick. */
     protected $driver = 'GD';
@@ -27,7 +29,7 @@ class EEasyImage extends CApplicationComponent
     protected $fileMode = 0750;
 
     /** @var string Path relative to the web root. This is where the cached files are kept. */
-    protected $relativeCachePath = '/assets/easyimage/';
+    public $relativeCachePath = '/assets/easyimage/';
 
     /**
      * @var int Cache lifetime in seconds. Default is 30 days.
@@ -89,8 +91,8 @@ class EEasyImage extends CApplicationComponent
     }
 
     /**
-     * Initialize EasyImage extension. The only thing we do here is to include the Retina JavaScript library
-     * (http://retina.js) if desired.
+     * Initialize EasyImage extension. We only do two things here: we include the Retina JavaScript library
+     * (http://retina.js) if desired. And we reassign deprecated configuration properties to their new home.
      *
      * @return void
      */
@@ -98,6 +100,13 @@ class EEasyImage extends CApplicationComponent
     {
         parent::init();
 
+        // Sometimes verbose is better. This is such a time.
+        if (!empty($this->cachePath))
+        {
+            $this->relativeCachePath = $this->cachePath;
+        }
+
+        // TODO:
         if ($this->retinaSupport)
         {
             if (empty($this->retinaSupportPath))
@@ -138,7 +147,7 @@ class EEasyImage extends CApplicationComponent
      */
     public function generateThumbnailUrl($image, $options = array())
     {
-        $metadata = new EEasyImageFile($image, $this->$relativeCachePath, $options);
+        $metadata = new EEasyImageFile($image, $this->relativeCachePath, $options);
 
         // Return the URL when we've previously generated an image and that image hasn't expired.
         if (file_exists($metadata->getAbsoluteFilePath()) && (time() - filemtime($metadata->getAbsoluteFilePath()) < $this->timeout))
@@ -203,7 +212,7 @@ class EEasyImage extends CApplicationComponent
      */
     protected function getFilePath($image)
     {
-        $path = Yii::getpathOfAlias('webroot') . '/' . $image;
+        $path = Yii::getPathOfAlias('webroot') . '/' . $image;
         if (is_file($path))
         {
             return $path;

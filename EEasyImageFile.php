@@ -23,11 +23,13 @@ class EEasyImageFile
     /** @var string */
     protected $filename;
 
-    /** @var string */
-    protected $image;
-
     /** @var array Externally provided metadata. */
     protected $metadata = array();
+
+    protected $originalAbsolutePath;
+
+    /** @var string */
+    protected $originalRelativePath;
 
     /** @var string */
     protected $relativePath;
@@ -45,13 +47,12 @@ class EEasyImageFile
      */
     public function __construct($image, $baseDirectory, $metadata = array())
     {
-        $this->$baseDirectory = rtrim($baseDirectory, '/');
-        $this->image = $image;
+        $this->baseDirectory = rtrim($baseDirectory, '/');
         $this->metadata = $metadata;
+        $this->originalRelativePath = $image;
 
-        if (!file_exists($this->getAbsoluteFilePath()))
+        if (!file_exists($this->getOriginalAbsolutePath()))
         {
-            // TODO: Fill out exception text.
             throw new CException('');
         }
     }
@@ -73,7 +74,7 @@ class EEasyImageFile
             return $this->absolutePath;
         }
 
-        return $this->absolutePath = rtrim(Yii::getpathOfAlias('webroot'), '/') . '/' . $this->getRelativePath();
+        return $this->absolutePath = rtrim(Yii::getPathOfAlias('webroot'), '/') . '/' . $this->getRelativePath();
     }
 
     public function getAbsoluteUrl()
@@ -99,7 +100,7 @@ class EEasyImageFile
             return $this->cacheKey;
         }
 
-        return $this->cacheKey = md5($this->image . serialize($this->metadata + array('filemtime' => filemtime($this->image))));
+        return $this->cacheKey = md5($this->getOriginalRelativePath() . serialize($this->metadata + array('filemtime' => $this->getOriginalAbsolutePath())));
     }
 
     public function getExtension()
@@ -109,7 +110,7 @@ class EEasyImageFile
             return $this->extension;
         }
 
-        return $this->extension = isset($this->metadata['type']) ? $this->metadata['type'] : pathinfo($this->image, PATHINFO_EXTENSION);
+        return $this->extension = isset($this->metadata['type']) ? $this->metadata['type'] : pathinfo($this->getOriginalRelativePath(), PATHINFO_EXTENSION);
     }
 
     public function getFilename()
@@ -120,11 +121,6 @@ class EEasyImageFile
         }
 
         return $this->filename = $this->getCacheKey() . '.' . $this->getExtension();
-    }
-
-    public function getImage()
-    {
-        return $this->image;
     }
 
     /**
@@ -138,6 +134,21 @@ class EEasyImageFile
         return $this->metadata;
     }
 
+    public function getOriginalAbsolutePath()
+    {
+        if (!empty($this->originalAbsolutePath))
+        {
+            return $this->originalAbsolutePath;
+        }
+
+        return $this->originalAbsolutePath = rtrim(Yii::getPathOfAlias('webroot')) . '/' . $this->getOriginalRelativePath();
+    }
+
+    public function getOriginalRelativePath()
+    {
+        return $this->originalRelativePath;
+    }
+
     public function getRelativePath()
     {
         if (!empty($this->relativePath))
@@ -146,7 +157,7 @@ class EEasyImageFile
         }
 
         $key = $this->getCacheKey();
-        return $this->relativePath = sprintf('%s/%s/%s', $this->$baseDirectory, $key{32}, $key{31});
+        return $this->relativePath = sprintf('%s/%s/%s', $this->baseDirectory, $key{31}, $key{30});
     }
 
     public function getRelativeUrl()
