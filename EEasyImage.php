@@ -9,9 +9,8 @@
  * @version 1.1.0
  */
 
-Yii::setPathOfAlias('easyimage', __DIR__);
-Yii::import('easyimage.vendor.kohana.image.classes.*');
-Yii::import('easyimage.vendor.kohana.backport.*');
+Yii::setPathOfAlias('kohanaimage', __DIR__ . '/vendor/kohana/image');
+Yii::import('kohanaimage.classes.*');
 
 class EEasyImage extends CApplicationComponent
 {
