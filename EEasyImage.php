@@ -9,6 +9,13 @@
  * @version 1.1.0
  */
 
+// Some "damaged" images are truncated when resized. GD warns us that a recoverable problem happened. However, there's
+// no clear way to fix this other than to use an image that isn't damaged. The problem isn't fatal, and some people have
+// reported that the following configuration value solves the issue. Others reported the opposite. The latter suggest
+// we use the dreaded '@' suppression technique. TODO: Figure out a better way to handle these cases.
+ini_set('gd.jpeg_ignore_warning', true);
+
+// Load required libraries.
 Yii::setPathOfAlias('kohanaimage', __DIR__ . '/vendor/kohana/image');
 Yii::import('kohanaimage.classes.*');
 
@@ -110,7 +117,7 @@ class EEasyImage extends CApplicationComponent
         {
             if (empty($this->retinaSupportPath))
             {
-                $this->retinaSupportPath = Yii::getPathOfAlias('easyimage.vendor.retina.src') . '/retina.js';
+                $this->retinaSupportPath = __DIR__ . '/vendor/retina/src/retina.js';
             }
 
             Yii::app()->clientScript->registerScriptFile(
@@ -333,37 +340,46 @@ class EEasyImage extends CApplicationComponent
      */
     public function generateThumbnailUrl($image, $options = array())
     {
-        $metadata = new EEasyImageFile($image, $this->relativeCachePath, $options);
-
-        // Return the URL when we've previously generated an image and that image hasn't expired.
-        if (file_exists($metadata->getAbsoluteFilePath()) && (time() - filemtime($metadata->getAbsoluteFilePath()) < $this->timeout))
+        try
         {
+            $metadata = new EEasyImageFile($image, $this->relativeCachePath, $options);
+
+            // Return the URL when we've previously generated an image and that image hasn't expired.
+            if (file_exists($metadata->getAbsoluteFilePath()) && (time() - filemtime($metadata->getAbsoluteFilePath()) < $this->timeout))
+            {
+                return $metadata->getAbsoluteUrl();
+            }
+
+            // Create the cache directory when it doesn't exist.
+            if (!is_dir($metadata->getAbsolutePath()))
+            {
+                mkdir($metadata->getAbsolutePath(), $this->fileMode, true);
+            }
+
+            $this->generateThumbnail($metadata);
+
+
+            // TODO: Address retina support.
+            //        // Same for high-resolution image
+            //        if ($this->retinaSupport && $result) {
+            //            if ($this->image()->width * 2 <= $originWidth && $this->image()->height * 2 <= $originHeight) {
+            //                $retinaFile = $cachePath . DIRECTORY_SEPARATOR . $hash . '@2x.' . $cacheFileExt;
+            //                if (isset($params['resize']['width']) && isset($params['resize']['height'])) {
+            //                    $params['resize']['width'] = $this->image()->width * 2;
+            //                    $params['resize']['height'] = $this->image()->height * 2;
+            //                }
+            //                $this->_doThumbOf($file, $retinaFile, $params);
+            //            }
+            //        }
+
             return $metadata->getAbsoluteUrl();
         }
-
-        // Create the cache directory when it doesn't exist.
-        if (!is_dir($metadata->getAbsolutePath()))
+        catch(Exception $exception)
         {
-            mkdir($metadata->getAbsolutePath(), $this->fileMode, true);
+            Yii::log($exception->getMessage(), CLogger::LEVEL_ERROR);
         }
 
-        $this->generateThumbnail($metadata);
-
-
-        // TODO: Address retina support.
-//        // Same for high-resolution image
-//        if ($this->retinaSupport && $result) {
-//            if ($this->image()->width * 2 <= $originWidth && $this->image()->height * 2 <= $originHeight) {
-//                $retinaFile = $cachePath . DIRECTORY_SEPARATOR . $hash . '@2x.' . $cacheFileExt;
-//                if (isset($params['resize']['width']) && isset($params['resize']['height'])) {
-//                    $params['resize']['width'] = $this->image()->width * 2;
-//                    $params['resize']['height'] = $this->image()->height * 2;
-//                }
-//                $this->_doThumbOf($file, $retinaFile, $params);
-//            }
-//        }
-
-        return $metadata->getAbsoluteUrl();
+        return null;
     }
 
     /**
