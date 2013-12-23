@@ -140,7 +140,7 @@ class EEasyImage extends CApplicationComponent
         }
         catch (CException $exception)
         {
-            return '';
+            Yii::log($exception->getMessage(), CLogger::LEVEL_ERROR);
         }
     }
 
@@ -155,7 +155,7 @@ class EEasyImage extends CApplicationComponent
 
         foreach ($image->getMetadata() as $key => $value)
         {
-            switch($key)
+            switch(strtolower($key))
             {
                 case 'background':
 
@@ -306,7 +306,7 @@ class EEasyImage extends CApplicationComponent
 
                 default:
 
-                    throw new CException('Action: ' . ucfirst($key) . '; Action not found.');
+                    throw new CException('Action: ' . $key . '; Action not found.');
 
             }
         }
