@@ -100,7 +100,11 @@ class EEasyImageFile
             return $this->cacheKey;
         }
 
-        return $this->cacheKey = md5($this->getOriginalRelativePath() . serialize($this->metadata + array('filemtime' => $this->getOriginalAbsolutePath())));
+        //
+        if (!empty($this->metadata))
+        {
+            return $this->cacheKey = md5($this->getOriginalRelativePath() . serialize($this->metadata + array('filemtime' => $this->getOriginalAbsolutePath())));
+        }
     }
 
     public function getExtension()
